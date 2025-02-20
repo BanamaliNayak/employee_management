@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/leave_provider.dart';
 import '../models/leave_request.dart';
 
 class ManagerLeaveApprovalScreen extends StatefulWidget {
@@ -12,59 +10,62 @@ class ManagerLeaveApprovalScreen extends StatefulWidget {
 
 class _ManagerLeaveApprovalScreenState
     extends State<ManagerLeaveApprovalScreen> {
-  List<LeaveRequest> pendingRequests = [];
-
-  @override
-  void initState() {
-    super.initState();
-    fetchPendingRequests();
-  }
-
-  Future<void> fetchPendingRequests() async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('leave_requests')
-        .where('status', isEqualTo: 'pending')
-        .get();
-
-    List<LeaveRequest> requests = snapshot.docs
-        .map((doc) => LeaveRequest.fromMap(doc.data() as Map<String, dynamic>))
-        .toList();
-
-    setState(() {
-      pendingRequests = requests;
-    });
-  }
-
+  // Function to update leave request status
   Future<void> _updateStatus(String id, String newStatus) async {
-    // Update status in Firestore via LeaveProvider.
-    await Provider.of<LeaveProvider>(context, listen: false)
-        .updateLeaveStatus(id, newStatus);
+    try {
+      await FirebaseFirestore.instance
+          .collection('leave_requests')
+          .doc(id)
+          .update({'status': newStatus});
 
-    // (Optional) Update employee leave balance here if approved.
-    // You can call updateLeaveBalance if needed.
-
-    // Simulate sending a push notification.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Leave request $newStatus')),
-    );
-
-    // Refresh the list.
-    fetchPendingRequests();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Leave request $newStatus'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
+  // Function to format date correctly
+  String _formatDate(dynamic date) {
+    if (date is Timestamp) {
+      return '${date.toDate().day}/${date.toDate().month}/${date.toDate().year}';
+    } else if (date is DateTime) {
+      return '${date.day}/${date.month}/${date.year}';
+    }
+    return 'Invalid Date';
+  }
+
+  // Function to display leave request details
   Widget _buildLeaveRequestTile(LeaveRequest request) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       child: ListTile(
-        title: Text(request.userName),
+        title: Text(request.userName,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Reason: ${request.reason}'),
             Text(
-                'Duration: ${request.startDate.toLocal().toString().split(" ")[0]} - ${request.endDate.toLocal().toString().split(" ")[0]}'),
+                'Duration: ${_formatDate(request.startDate)} - ${_formatDate(request.endDate)}'),
+            Text('Type: ${request.leaveType}'),
             if (request.attachmentUrl != null)
-              Text('Attachment: ${request.attachmentUrl}'),
+              GestureDetector(
+                onTap: () => _viewAttachment(request.attachmentUrl!),
+                child: const Text('View Attachment',
+                    style: TextStyle(
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline)),
+              ),
           ],
         ),
         trailing: Row(
@@ -84,18 +85,41 @@ class _ManagerLeaveApprovalScreenState
     );
   }
 
+  // Function to open the attachment (can be expanded to open in a browser)
+  void _viewAttachment(String url) {
+    print('Opening attachment: $url');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pending Leave Requests'),
-      ),
-      body: pendingRequests.isEmpty
-          ? const Center(child: Text('No pending requests'))
-          : ListView.builder(
-        itemCount: pendingRequests.length,
-        itemBuilder: (context, index) {
-          return _buildLeaveRequestTile(pendingRequests[index]);
+      appBar: AppBar(title: const Text('Pending Leave Requests')),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('leave_requests')
+            .where('status', isEqualTo: 'pending')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error loading requests'));
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('No pending requests'));
+          }
+
+          List<LeaveRequest> requests = snapshot.data!.docs
+              .map((doc) =>
+              LeaveRequest.fromMap(doc.data() as Map<String, dynamic>))
+              .toList();
+
+          return ListView.builder(
+            itemCount: requests.length,
+            itemBuilder: (context, index) =>
+                _buildLeaveRequestTile(requests[index]),
+          );
         },
       ),
     );

@@ -29,7 +29,7 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Employee Dashboard'),
+        title: const Text('Employee Screen'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -39,29 +39,40 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LeaveApplicationScreen()),
-                );
-              },
-              child: const Text('Apply for Leave'),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => EmployeeDirectoryScreen()),
-                );
-              },
-              child: const Text('Employee Directory'),
-            ),
-            // Optionally, add a button for viewing leave balance or profile details.
-          ],
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 160,
+                width: 340,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => LeaveApplicationScreen()),
+                    );
+                  },
+                  child: const Text('Apply for Leave', style: TextStyle(fontSize: 20)),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              SizedBox(
+                height: 160,
+                width: 340,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => EmployeeDirectoryScreen()),
+                    );
+                  },
+                  child: const Text('Employee Directory',style: TextStyle(fontSize: 20)),
+                ),
+              ),
+              // Optionally, add a button for viewing leave balance or profile details.
+            ],
+          ),
         ),
       ),
     );

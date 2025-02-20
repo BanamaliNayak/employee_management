@@ -25,7 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     await FirebaseFirestore.instance.collection('employees').get();
     // Leave requests breakdown
     QuerySnapshot leaveSnapshot =
-    await FirebaseFirestore.instance.collection('leave_requests').get();
+    await FirebaseFirestore.instance.collection('leave_request').get();
 
     int pending = 0, approved = 0, rejected = 0;
     for (var doc in leaveSnapshot.docs) {

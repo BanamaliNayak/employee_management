@@ -30,7 +30,7 @@ class _HrScreenState extends State<HrScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('HR Dashboard'),
+        title: const Text('HR Screen'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -40,38 +40,53 @@ class _HrScreenState extends State<HrScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => DashboardScreen()),
-                );
-              },
-              child: const Text('Dashboard & Analytics'),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => EmployeeDirectoryScreen()),
-                );
-              },
-              child: const Text('Employee Directory'),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ManagerLeaveApprovalScreen()),
-                );
-              },
-              child: const Text('Leave Approval'),
-            ),
-          ],
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 160,
+                width: 340,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => DashboardScreen()),
+                    );
+                  },
+                  child: const Text('Dashboard & Analytics', style: TextStyle(fontSize: 20),),
+                ),
+              ),
+              const SizedBox(height: 30.0),
+              SizedBox(
+                height: 160,
+                width: 340,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => EmployeeDirectoryScreen()),
+                    );
+                  },
+                  child: const Text('Employee Directory',style: TextStyle(fontSize: 20)),
+                ),
+              ),
+              const SizedBox(height: 30.0),
+              SizedBox(
+                height: 160,
+                width: 340,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ManagerLeaveApprovalScreen()),
+                    );
+                  },
+                  child: const Text('Leave Approval',style: TextStyle(fontSize: 20)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
